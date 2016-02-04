@@ -181,6 +181,12 @@ describe('utils',function(){
     it('truncateWidth("漢字testてすと", 12) === "漢字testて…"',function(){
       expect(truncate('漢字testてすと',12)).to.equal('漢字testて…');
     });
+
+    it('handles color code with CJK chars',function(){
+      var original = '漢字\x1b[31m漢字\x1b[0m漢字';
+      var expected = '漢字\x1b[31m漢字\x1b[0m漢…';
+      expect(truncate(original,11)).to.equal(expected);
+    });
   });
 
   function defaultOptions(){
@@ -311,6 +317,18 @@ describe('utils',function(){
       var expected = ['ab cd','ef gh', 'ij kl'];
       expect(wordWrap(7, input)).to.eql(expected);
     });
+
+    it('wraps CJK chars', function(){
+      var input = '漢字 漢\n字 漢字';
+      var expected = ['漢字 漢','字 漢字'];
+      expect(wordWrap(7, input)).to.eql(expected);
+    });
+
+    it('wraps CJK chars with colors', function(){
+      var input = '\x1b[31m漢字\x1b[0m\n 漢字';
+      var expected = ['\x1b[31m漢字\x1b[0m', ' 漢字'];
+      expect(wordWrap(5, input)).to.eql(expected);
+    });
   });
 
   describe('colorizeLines',function(){
@@ -384,5 +402,13 @@ describe('utils',function(){
       ]);
     });
 
+    it('handles CJK chars',function(){
+      var input = colors.red('漢字\nテスト').split('\n');
+
+      expect(utils.colorizeLines(input)).to.eql([
+        colors.red('漢字'),
+        colors.red('テスト')
+      ]);
+    });
   });
 });
